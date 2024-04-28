@@ -1,26 +1,3 @@
-variable "name" {
-  type    = string
-  default = "main"
-}
-
-variable "azs" {
-  type    = list(string)
-  default = ["ap-northeast-1a", "ap-northeast-1c", "ap-northeast-1d"]
-}
-
-variable "vpc_cidr" {
-  default = "10.0.0.0/16"
-}
-
-variable "public_subnet_cidrs" {
-  default = ["10.0.0.0/24", "10.0.1.0/24", "10.0.2.0/24"]
-}
-
-variable "private_subnet_cidrs" {
-  default = ["10.0.10.0/24", "10.0.11.0/24", "10.0.12.0/24"]
-}
-
-
 #----------------------------------------
 # VPCの作成
 #----------------------------------------
@@ -44,4 +21,30 @@ resource "aws_subnet" "publics" {
   tags = {
     Name = "${var.name}-public-${count.index}"
   }
+}
+
+resource "aws_internet_gateway" "main" {
+  vpc_id = aws_vpc.main.id
+
+  tags = {
+    Name = var.name
+  }
+}
+
+resource "aws_route_table" "public_route" {
+  vpc_id = aws_vpc.main.id
+  route {
+    cidr_block = "0.0.0.0/0"
+    gateway_id = aws_internet_gateway.main.id
+  }
+  tags = {
+    Name = var.name
+  }
+}
+
+# SubnetとRoute tableの関連付け
+resource "aws_route_table_association" "public_route_associate" {
+  for_each       = { for i in aws_subnet.publics : i.id => i }
+  subnet_id      = each.value.id
+  route_table_id = aws_route_table.public_route.id
 }
