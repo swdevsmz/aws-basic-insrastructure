@@ -3,6 +3,13 @@ variable "name" {
   default = "main"
 }
 
+# 鍵の名前
+# 秘密鍵のファイル名に相当する名前
+variable "key_name" {
+  type    = string
+  default = "ec2_key"
+}
+
 variable "azs" {
   type    = list(string)
   default = ["ap-northeast-1a", "ap-northeast-1c", "ap-northeast-1d"]
