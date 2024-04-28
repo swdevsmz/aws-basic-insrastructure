@@ -18,7 +18,7 @@ resource "aws_instance" "amazonlinux" {
   ami                    = data.aws_ssm_parameter.amzn2_latest_ami.value
   instance_type          = "t2.nano"
   vpc_security_group_ids = [aws_security_group.ec2_security_group.id]
-  subnet_id              = aws_subnet.publics[0].id
+  subnet_id              = aws_subnet.public.id
 
   key_name = aws_key_pair.main.key_name
 

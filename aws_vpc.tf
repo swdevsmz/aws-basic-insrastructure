@@ -11,17 +11,15 @@ resource "aws_vpc" "main" {
 }
 
 # Public Subnet
-resource "aws_subnet" "publics" {
-  count = length(var.public_subnet_cidrs)
-
+resource "aws_subnet" "public" {
   vpc_id = aws_vpc.main.id
 
-  availability_zone       = var.azs[count.index]
-  cidr_block              = var.public_subnet_cidrs[count.index]
+  availability_zone       = "ap-northeast-1a"
+  cidr_block              = "10.0.0.0/24"
   map_public_ip_on_launch = true # 起動したインスタンスにパブリックIPを自動割当
 
   tags = {
-    Name = "${var.name}-public-${count.index}"
+    Name = "${var.name}-public"
   }
 }
 
@@ -46,10 +44,7 @@ resource "aws_route_table" "public_route" {
 
 # SubnetとRoute tableの関連付け
 resource "aws_route_table_association" "public_route_associate" {
-  count     = length(var.public_subnet_cidrs)
-  subnet_id = element(aws_subnet.publics.*.id, count.index)
-
-  # subnet_id      = each.value.id
+  subnet_id = aws_subnet.public.id 
   route_table_id = aws_route_table.public_route.id
 }
 
@@ -67,7 +62,6 @@ resource "aws_security_group" "ec2_security_group" {
     from_port = 22
     to_port   = 22
     protocol  = "tcp"
-    # cidr_blocks = var.public_subnet_cidrs
     cidr_blocks = ["0.0.0.0/0"] # 接続元を限定する場合は変更する
   }
 
